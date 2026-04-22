@@ -276,6 +276,10 @@ export {
 	confirmationRequestPayloadSchema,
 	credentialRequestSchema,
 	workflowSetupNodeSchema,
+	instanceAiEvalMetricKindSchema,
+	instanceAiEvalMetricProposalSchema,
+	instanceAiEvalsProposeSuspendSchema,
+	instanceAiEvalsProposeResumeSchema,
 	errorPayloadSchema,
 	filesystemRequestPayloadSchema,
 	mcpToolSchema,
@@ -372,6 +376,10 @@ export type {
 	InstanceAiEvalNodeResult,
 	InstanceAiEvalMockHints,
 	InstanceAiEvalExecutionResult,
+	InstanceAiEvalMetricKind,
+	InstanceAiEvalMetricProposal,
+	InstanceAiEvalsProposeSuspend,
+	InstanceAiEvalsProposeResume,
 } from './schemas/instance-ai.schema';
 
 export {
