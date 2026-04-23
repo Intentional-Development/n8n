@@ -341,6 +341,9 @@ export class InstanceAiController {
 			testTriggerNode: body.testTriggerNode,
 			answers: body.answers,
 			resourceDecision: body.resourceDecision,
+			datasetChoice: body.datasetChoice,
+			existingDataTableId: body.existingDataTableId,
+			enabledMetricIds: body.enabledMetricIds,
 		});
 		if (!resolved) {
 			throw new NotFoundError('Confirmation request not found or not authorized');
