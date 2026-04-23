@@ -8,22 +8,19 @@ import { runThroughputTest } from '../harness/throughput-harness';
 
 const envMessages = parseInt(process.env.BENCHMARK_MESSAGES ?? '0', 10);
 
-test.use({ capability: { env: { TEST_ISOLATION: 'kafka-tp-30n-10kb' } } });
+test.use({ capability: { env: { TEST_ISOLATION: 'kafka-tp-noop' } } });
 
 test.describe(
-	'Kafka Throughput: 30n/10KB',
+	'Kafka Throughput: trigger -> noop',
 	{
 		annotation: [{ type: 'owner', description: 'Catalysts' }],
 	},
 	() => {
-		test('30 nodes, 10KB payload, 10KB output/node, 5000 msgs', async ({
-			api,
-			services,
-		}, testInfo) => {
+		test('trigger + 1 noop, 1KB payload, 5000 msgs', async ({ api, services }, testInfo) => {
 			const handle = await kafkaDriver.setup({
 				api,
 				services,
-				scenario: { nodeCount: 30, payloadSize: '10KB', nodeOutputSize: '10KB', partitions: 3 },
+				scenario: { nodeCount: 1, payloadSize: '1KB', nodeOutputSize: 'noop', partitions: 3 },
 			});
 			await runThroughputTest({
 				handle,
@@ -31,8 +28,8 @@ test.describe(
 				services,
 				testInfo,
 				messageCount: envMessages || 5_000,
-				nodeCount: 30,
-				nodeOutputSize: '10KB',
+				nodeCount: 1,
+				nodeOutputSize: 'noop',
 				trigger: 'kafka',
 				timeoutMs: 900_000,
 				plan: BENCHMARK_MAIN_RESOURCES,
