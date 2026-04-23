@@ -71,7 +71,7 @@ export async function waitForThroughput(
 		expectedCount,
 		nodeCount,
 		timeoutMs,
-		pollIntervalMs = 5000,
+		pollIntervalMs = 1000,
 		metricQuery = WORKFLOW_SUCCESS_QUERY,
 		baselineValue = 0,
 	} = options;

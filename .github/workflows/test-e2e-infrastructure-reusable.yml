@@ -38,7 +38,9 @@ jobs:
     uses: ./.github/workflows/test-e2e-reusable.yml
     with:
       test-mode: docker-artifact
-      test-command: pnpm --filter=n8n-playwright test:all --project='${{ matrix.profile }}:infrastructure' --workers=1
+      # Scoped experiment: single throughput scenario, 30k messages, 1s poll interval.
+      # Restore the broader command once measurement accuracy has been validated.
+      test-command: "BENCHMARK_MESSAGES=30000 pnpm --filter=n8n-playwright test:all --project='${{ matrix.profile }}:infrastructure' --workers=1 --grep 'Kafka Throughput: 30n/10KB'"
       runner: ${{ matrix.runner }}
       timeout-minutes: 60
     secrets: inherit

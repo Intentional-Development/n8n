@@ -34,7 +34,7 @@ test.describe(
 				nodeCount: 30,
 				nodeOutputSize: '10KB',
 				trigger: 'kafka',
-				timeoutMs: 300_000,
+				timeoutMs: 900_000,
 				plan: BENCHMARK_MAIN_RESOURCES,
 				workerPlan: BENCHMARK_WORKER_RESOURCES,
 			});
