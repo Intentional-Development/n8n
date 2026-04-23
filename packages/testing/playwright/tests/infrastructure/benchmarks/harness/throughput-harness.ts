@@ -162,9 +162,11 @@ export async function runThroughputTest(options: ThroughputTestOptions): Promise
 			`  Nodes: ${nodeCount} (${nodeOutputSize}) | Messages: ${messageCount}\n` +
 			`  Completed: ${result.totalCompleted}/${messageCount}\n` +
 			`  Throughput: ${result.avgExecPerSec.toFixed(1)} exec/s | ${result.actionsPerSec.toFixed(1)} actions/s\n` +
-			`  Peak: ${result.peakExecPerSec.toFixed(1)} exec/s | ${result.peakActionsPerSec.toFixed(1)} actions/s\n` +
 			`  Duration: ${(result.durationMs / 1000).toFixed(1)}s`,
 	);
 
-	expect(result.totalCompleted).toBeGreaterThan(0);
+	// Fail loudly on partial completion — a stalled run produces misleading numbers
+	// even with the stall-detection bail-out, because the reported throughput is
+	// calculated over only the messages that actually made it through.
+	expect(result.totalCompleted).toBe(messageCount);
 }

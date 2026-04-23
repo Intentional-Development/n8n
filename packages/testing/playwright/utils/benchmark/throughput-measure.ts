@@ -65,6 +65,8 @@ export async function waitForThroughput(
 		pollIntervalMs?: number;
 		metricQuery?: string;
 		baselineValue?: number;
+		/** Break out of the poll loop if no progress is seen for this long. */
+		stallThresholdMs?: number;
 	},
 ): Promise<ThroughputResult> {
 	const {
@@ -74,6 +76,7 @@ export async function waitForThroughput(
 		pollIntervalMs = 1000,
 		metricQuery = WORKFLOW_SUCCESS_QUERY,
 		baselineValue = 0,
+		stallThresholdMs = 60_000,
 	} = options;
 
 	const samples: ThroughputSample[] = [];
@@ -81,6 +84,7 @@ export async function waitForThroughput(
 	const deadline = startTime + timeoutMs;
 	let lastValue = baselineValue;
 	let highWaterMark = baselineValue;
+	let lastProgressTime = startTime;
 
 	while (Date.now() < deadline) {
 		const remaining = deadline - Date.now();
@@ -117,13 +121,25 @@ export async function waitForThroughput(
 			delta,
 		});
 
-		if (delta !== 0) {
+		if (delta > 0) {
 			console.log(`[THROUGHPUT] Completed: ${completed}/${expectedCount} (+${delta})`);
+			lastProgressTime = Date.now();
 		}
 
 		lastValue = current;
 
 		if (completed >= expectedCount) {
+			break;
+		}
+
+		// Stall detection: if progress has stopped, bail early instead of waiting for full timeout.
+		// Only trips after we've seen at least one non-zero delta, so we don't treat slow warm-up
+		// as a stall.
+		const timeSinceProgress = Date.now() - lastProgressTime;
+		if (completed > 0 && timeSinceProgress > stallThresholdMs) {
+			console.warn(
+				`[THROUGHPUT] Stalled — no progress for ${(timeSinceProgress / 1000).toFixed(0)}s at ${completed}/${expectedCount}. Bailing early.`,
+			);
 			break;
 		}
 	}
@@ -164,44 +180,37 @@ function calculateThroughput(
 		};
 	}
 
-	// Duration measures actual processing time by excluding startup overhead.
-	// Use the last zero-progress sample as the reference start — that's the
-	// tightest bound on when processing actually began, regardless of whether
-	// completions span one poll interval or many.
+	// Duration measures actual processing time by excluding startup overhead AND
+	// any trailing dead time after the last completion was recorded. Using the
+	// last ACTIVE sample (rather than the last poll) avoids inflating the
+	// denominator when the counter stalls or the run bails out early.
 	const firstActiveIndex = samples.findIndex((s) => s.delta > 0);
-	const lastSample = samples[samples.length - 1];
-	const totalCompleted = lastSample.completed;
-	const referenceStart = firstActiveIndex > 0 ? samples[firstActiveIndex - 1].timestamp : startTime;
-	const durationMs = lastSample.timestamp - referenceStart;
-
-	// Sliding window peak: average rate over 3 consecutive intervals.
-	// Smooths burst noise from VictoriaMetrics scrape batching.
-	const PEAK_WINDOW = 3;
-	let peakExecPerSec = 0;
-
-	for (let i = 0; i < samples.length; i++) {
-		const windowEnd = Math.min(i + PEAK_WINDOW, samples.length) - 1;
-		const windowStart = i;
-		const windowDelta = samples
-			.slice(windowStart, windowEnd + 1)
-			.reduce((sum, s) => sum + Math.max(0, s.delta), 0);
-		const windowStartTime = windowStart === 0 ? startTime : samples[windowStart - 1].timestamp;
-		const windowMs = samples[windowEnd].timestamp - windowStartTime;
-		if (windowMs > 0 && windowDelta > 0) {
-			const rate = (windowDelta / windowMs) * 1000;
-			peakExecPerSec = Math.max(peakExecPerSec, rate);
+	let lastActiveIndex = samples.length - 1;
+	for (let i = samples.length - 1; i >= 0; i--) {
+		if (samples[i].delta > 0) {
+			lastActiveIndex = i;
+			break;
 		}
 	}
 
+	const lastActiveSample = samples[lastActiveIndex];
+	const totalCompleted = lastActiveSample.completed;
+	const referenceStart = firstActiveIndex > 0 ? samples[firstActiveIndex - 1].timestamp : startTime;
+	const durationMs = lastActiveSample.timestamp - referenceStart;
+
+	// Peak rate intentionally omitted: at current poll/scrape cadence, a single
+	// poll interval can catch a full 15s scrape batch worth of completions,
+	// inflating "peak" by an order of magnitude. Reporting it is more misleading
+	// than useful.
 	const avgExecPerSec = durationMs > 0 ? (totalCompleted / durationMs) * 1000 : 0;
 
 	return {
 		totalCompleted,
 		durationMs,
 		avgExecPerSec,
-		peakExecPerSec,
+		peakExecPerSec: 0,
 		actionsPerSec: avgExecPerSec * nodeCount,
-		peakActionsPerSec: peakExecPerSec * nodeCount,
+		peakActionsPerSec: 0,
 		samples,
 	};
 }
@@ -215,14 +224,6 @@ export async function attachThroughputResults(
 ): Promise<void> {
 	await attachMetric(testInfo, 'exec-per-sec', result.avgExecPerSec, 'exec/s', dimensions);
 	await attachMetric(testInfo, 'actions-per-sec', result.actionsPerSec, 'actions/s', dimensions);
-	await attachMetric(testInfo, 'peak-exec-per-sec', result.peakExecPerSec, 'exec/s', dimensions);
-	await attachMetric(
-		testInfo,
-		'peak-actions-per-sec',
-		result.peakActionsPerSec,
-		'actions/s',
-		dimensions,
-	);
 	await attachMetric(testInfo, 'total-completed', result.totalCompleted, 'count', dimensions);
 	await attachMetric(testInfo, 'duration', result.durationMs, 'ms', dimensions);
 }

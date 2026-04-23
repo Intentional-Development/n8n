@@ -164,8 +164,6 @@ export async function runWebhookThroughputTest(options: WebhookThroughputOptions
 		`[WEBHOOK-${mode} RESULT] ${testInfo.title}\n` +
 			`  n8n Throughput: ${throughputResult.avgExecPerSec.toFixed(1)} exec/s | ` +
 			`${throughputResult.actionsPerSec.toFixed(1)} actions/s\n` +
-			`  Peak: ${throughputResult.peakExecPerSec.toFixed(1)} exec/s | ` +
-			`${throughputResult.peakActionsPerSec.toFixed(1)} actions/s\n` +
 			`  HTTP: ${cannonResult.requests.average.toFixed(1)} req/s | ` +
 			`p50: ${cannonResult.latency.p50}ms | p99: ${cannonResult.latency.p99}ms\n` +
 			`  Errors: ${cannonResult.errors} timeouts, ${cannonResult.non2xx} non-2xx\n` +
