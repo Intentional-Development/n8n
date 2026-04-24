@@ -43,6 +43,11 @@ export const postgres: Service<PostgresResult> = {
 				'full_page_writes=off',
 				'-c',
 				'max_connections=200',
+				// TEMP: benchmark experiment — disable autovacuum to test whether it
+				// is the primary driver of sustained-throughput drift on long Kafka
+				// runs. Revert after measurement.
+				'-c',
+				'autovacuum=off',
 			])
 			.withReuse()
 			.start();
