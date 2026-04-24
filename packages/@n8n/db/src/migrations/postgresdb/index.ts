@@ -162,8 +162,8 @@ import { ChangeWorkflowPublishHistoryVersionIdToSetNull1775740765000 } from '../
 import { CreateTrustedKeyTables1776000000000 } from '../common/1776000000000-CreateTrustedKeyTables';
 import { CreateFavoritesTable1776150756000 } from '../common/1776150756000-CreateFavoritesTable';
 import { CreateDeploymentKeyTable1777000000000 } from '../common/1777000000000-CreateDeploymentKeyTable';
-import { AddLangsmithIdsToInstanceAiRunSnapshots1777100000000 } from '../common/1777100000000-AddLangsmithIdsToInstanceAiRunSnapshots';
 import { AddJweKeyIndexesToDeploymentKey1777023444000 } from '../common/1777023444000-AddJweKeyIndexesToDeploymentKey';
+import { AddLangsmithIdsToInstanceAiRunSnapshots1777100000000 } from '../common/1777100000000-AddLangsmithIdsToInstanceAiRunSnapshots';
 import type { Migration } from '../migration-types';
 
 export const postgresMigrations: Migration[] = [
@@ -331,6 +331,6 @@ export const postgresMigrations: Migration[] = [
 	CreateTrustedKeyTables1776000000000,
 	CreateFavoritesTable1776150756000,
 	CreateDeploymentKeyTable1777000000000,
-	AddLangsmithIdsToInstanceAiRunSnapshots1777100000000,
 	AddJweKeyIndexesToDeploymentKey1777023444000,
+	AddLangsmithIdsToInstanceAiRunSnapshots1777100000000,
 ];
