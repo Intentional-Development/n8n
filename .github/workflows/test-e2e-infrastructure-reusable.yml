@@ -42,7 +42,7 @@ jobs:
       test-mode: docker-artifact
       # Scoped experiment: single throughput scenario, 30k messages, 1s poll interval.
       # Restore the broader command once measurement accuracy has been validated.
-      test-command: "BENCHMARK_MESSAGES=30000 pnpm --filter=n8n-playwright test:all --project='${{ matrix.profile }}:infrastructure' --workers=1 --grep 'Kafka Throughput: trigger -> noop'"
+      test-command: "BENCHMARK_MESSAGES=300000 pnpm --filter=n8n-playwright test:all --project='${{ matrix.profile }}:infrastructure' --workers=1 --grep 'Kafka Throughput: trigger -> noop'"
       runner: ${{ matrix.runner }}
       timeout-minutes: 60
     secrets: inherit
