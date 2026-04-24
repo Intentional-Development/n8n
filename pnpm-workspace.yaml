@@ -73,7 +73,7 @@ catalog:
   mime-types: 3.0.2
   mysql2: 3.17.0
   nanoid: 3.3.8
-  nodemailer: 7.0.11
+  nodemailer: 8.0.5
   openai: 6.19.0
   pg: 8.17.0
   picocolors: 1.0.1
@@ -181,3 +181,5 @@ minimumReleaseAgeExclude:
   - follow-redirects
   # Renovate security update: zod@3.25.76
   - zod@3.25.76
+  # Renovate security update: nodemailer@8.0.5
+  - nodemailer@8.0.5
