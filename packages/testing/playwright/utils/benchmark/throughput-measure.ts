@@ -193,16 +193,52 @@ function calculateThroughput(
 		}
 	}
 
+	const firstActiveSample = firstActiveIndex >= 0 ? samples[firstActiveIndex] : samples[0];
 	const lastActiveSample = samples[lastActiveIndex];
+
+	// Skip the warm-up window so reported throughput reflects sustained behavior,
+	// not V8 JIT / PG pool fill / Kafka consumer ramp-up. We look for the first
+	// sample whose timestamp is >= firstActive + WARMUP_MS and anchor the
+	// measurement there. If the run is too short to have a post-warmup window
+	// (<= 2x warmup), fall back to measuring from first-active (old behavior)
+	// and flag it in logs so short-run numbers remain interpretable.
+	const WARMUP_MS = 30_000;
+	const activeSpanMs = lastActiveSample.timestamp - firstActiveSample.timestamp;
+	const useWarmupSkip = activeSpanMs >= 2 * WARMUP_MS;
+
+	let measurementStartIndex = firstActiveIndex >= 0 ? firstActiveIndex : 0;
+	if (useWarmupSkip) {
+		const warmupDeadline = firstActiveSample.timestamp + WARMUP_MS;
+		const postWarmupIndex = samples.findIndex(
+			(s, i) => i >= measurementStartIndex && s.timestamp >= warmupDeadline,
+		);
+		if (postWarmupIndex !== -1 && postWarmupIndex <= lastActiveIndex) {
+			measurementStartIndex = postWarmupIndex;
+		}
+	} else if (firstActiveIndex >= 0) {
+		console.log(
+			`[THROUGHPUT] Run too short (${(activeSpanMs / 1000).toFixed(1)}s) to exclude warm-up; reporting includes ramp-up period`,
+		);
+	}
+
+	const measurementStartSample = samples[measurementStartIndex];
+	const referenceStart =
+		measurementStartIndex > 0
+			? samples[measurementStartIndex - 1].timestamp
+			: firstActiveIndex > 0
+				? samples[firstActiveIndex - 1].timestamp
+				: startTime;
+
 	const totalCompleted = lastActiveSample.completed;
-	const referenceStart = firstActiveIndex > 0 ? samples[firstActiveIndex - 1].timestamp : startTime;
+	const measuredCompleted =
+		lastActiveSample.completed - measurementStartSample.completed + measurementStartSample.delta;
 	const durationMs = lastActiveSample.timestamp - referenceStart;
 
 	// Peak rate intentionally omitted: at current poll/scrape cadence, a single
 	// poll interval can catch a full 15s scrape batch worth of completions,
 	// inflating "peak" by an order of magnitude. Reporting it is more misleading
 	// than useful.
-	const avgExecPerSec = durationMs > 0 ? (totalCompleted / durationMs) * 1000 : 0;
+	const avgExecPerSec = durationMs > 0 ? (measuredCompleted / durationMs) * 1000 : 0;
 
 	return {
 		totalCompleted,
