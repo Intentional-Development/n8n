@@ -211,8 +211,8 @@ catalogs:
       specifier: ^4.19.3
       version: 4.19.3
     uuid:
-      specifier: 10.0.0
-      version: 10.0.0
+      specifier: 14.0.0
+      version: 14.0.0
     vite:
       specifier: ^8.0.2
       version: 8.0.2
@@ -905,7 +905,7 @@ importers:
         version: 0.2.2
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
     devDependencies:
       '@n8n/typescript-config':
         specifier: workspace:*
@@ -1256,7 +1256,7 @@ importers:
         version: 0.2.2
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       xss:
         specifier: 'catalog:'
         version: 1.0.15
@@ -2392,7 +2392,7 @@ importers:
         version: link:../../workflow
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       zod:
         specifier: 3.25.67
         version: 3.25.67
@@ -2729,7 +2729,7 @@ importers:
         version: 7.24.6
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       validator:
         specifier: 13.15.26
         version: 13.15.26
@@ -2967,7 +2967,7 @@ importers:
         version: 1.15.0
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       winston:
         specifier: 3.14.2
         version: 3.14.2
@@ -3059,7 +3059,7 @@ importers:
         version: 4.0.1
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       vue:
         specifier: catalog:frontend
         version: 3.5.26(typescript@6.0.2)
@@ -3776,7 +3776,7 @@ importers:
         version: 6.0.2
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       v-code-diff:
         specifier: ^1.13.1
         version: 1.13.1(patch_hash=21588de80e591bbc1e5a068d9bce311db5254686443652945d2c7887fdafe9d9)(vue@3.5.26(typescript@6.0.2))
@@ -4186,7 +4186,7 @@ importers:
         version: 1.2.2(date-fns@2.30.0)(lodash@4.18.1)(zod@3.25.67)
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       vm2:
         specifier: 'catalog:'
         version: 3.10.5
@@ -4569,7 +4569,7 @@ importers:
         version: 2.3.5
       uuid:
         specifier: 'catalog:'
-        version: 10.0.0
+        version: 14.0.0
       xml2js:
         specifier: 'catalog:'
         version: 0.6.2
@@ -11941,6 +11941,7 @@ packages:
 
   '@xata.io/client@0.28.4':
     resolution: {integrity: sha512-B02WHIA/ViHya84XvH6JCo13rd5h4S5vVyY2aYi6fIcjDIbCpsSLJ4oGWpdodovRYeAZy9Go4OhdyZwMIRC4BQ==}
+    deprecated: Package no longer supported. Contact Support at https://www.npmjs.com/support for more info.
     peerDependencies:
       typescript: 6.0.2
 
@@ -11951,6 +11952,7 @@ packages:
   '@xmldom/xmldom@0.8.12':
     resolution: {integrity: sha512-9k/gHF6n/pAi/9tqr3m3aqkuiNosYTurLLUtc7xQ9sxB/wm7WPygCv8GYa6mS0fLJEHhqMC1ATYhz++U/lRHqg==}
     engines: {node: '>=10.0.0'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@zilliz/milvus2-sdk-node@2.5.7':
     resolution: {integrity: sha512-5gvIlllZCDkbcy1O9WjV4bZWgq+mlNekl5W4JcyO0HpyPcovoGF6cgWksl38kjXSl7WUSt1jWm2Q71Ua3r6foA==}
@@ -21262,6 +21264,10 @@ packages:
 
   uuid@13.0.0:
     resolution: {integrity: sha512-XQegIaBTVUjSHliKqcnFqYypAd4S+WCYt5NIeRs6w/UAry7z8Y9j5ZwRRL4kzq9U3sD6v+85er9FvkEaBpji2w==}
+    hasBin: true
+
+  uuid@14.0.0:
+    resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
     hasBin: true
 
   uuid@8.3.2:
@@ -44076,6 +44082,8 @@ snapshots:
   uuid@11.1.0: {}
 
   uuid@13.0.0: {}
+
+  uuid@14.0.0: {}
 
   uuid@8.3.2: {}
 
