@@ -464,6 +464,19 @@ export class ExecutionService {
 		return { results, ...executionCount };
 	}
 
+	async findMcpRangeWithCount(query: ExecutionSummaries.RangeQuery) {
+		const results = await this.executionRepository.findManyByMcpRangeQuery(query);
+
+		const { range: _, ...countQuery } = query;
+
+		const executionCount = await this.getCountForQuery(
+			{ ...countQuery, kind: 'count' },
+			async () => await this.executionRepository.fetchMcpCount({ ...countQuery, kind: 'count' }),
+		);
+
+		return { results, ...executionCount };
+	}
+
 	/**
 	 * Return:
 	 *
@@ -539,6 +552,16 @@ export class ExecutionService {
 	 *  - whether the count is an estimate or not
 	 */
 	private async getExecutionsCountForQuery(countQuery: ExecutionSummaries.CountQuery) {
+		return await this.getCountForQuery(
+			countQuery,
+			async () => await this.executionRepository.fetchCount(countQuery),
+		);
+	}
+
+	private async getCountForQuery(
+		_countQuery: ExecutionSummaries.CountQuery,
+		fetchCount: () => Promise<number>,
+	) {
 		if (this.globalConfig.database.type === 'postgresdb') {
 			const liveRows = await this.executionRepository.getLiveExecutionRowsOnPostgres();
 
@@ -550,7 +573,7 @@ export class ExecutionService {
 			}
 		}
 
-		const count = await this.executionRepository.fetchCount(countQuery);
+		const count = await fetchCount();
 
 		return { count, estimated: false };
 	}
