@@ -108,6 +108,23 @@ const CI_BENCHMARK_PROFILES: BenchmarkProfile[] = [
 			},
 		},
 	},
+	{
+		// Direct mode with the same tuning as queue-tuned so a head-to-head
+		// comparison isolates queue-dispatch overhead from engine/trigger cost.
+		name: 'direct-tuned',
+		config: {
+			...BENCHMARK_BASE_CONFIG,
+			services: [...BENCHMARK_BASE_CONFIG.services!, 'kafka'],
+			env: {
+				...BENCHMARK_BASE_CONFIG.env,
+				N8N_LOG_LEVEL: 'info',
+				DB_POSTGRESDB_POOL_SIZE: '30',
+				DB_POSTGRESDB_CONNECTION_TIMEOUT: '60000',
+				N8N_CONCURRENCY_PRODUCTION_LIMIT: '20',
+				EXECUTIONS_DATA_SAVE_ON_SUCCESS: 'none',
+			},
+		},
+	},
 ];
 
 // Benchmark profiles that host local-only tests (model API keys, long runtimes,

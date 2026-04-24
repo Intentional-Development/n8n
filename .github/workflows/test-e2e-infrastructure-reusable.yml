@@ -28,12 +28,14 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # Temporarily disabled to isolate the 16vcpu runner trial below.
+          # Temporarily disabled to isolate the direct-tuned comparison run below.
           # - profile: benchmark-direct
           #   runner: blacksmith-4vcpu-ubuntu-2204
           # - profile: benchmark-queue
           #   runner: blacksmith-8vcpu-ubuntu-2204
-          - profile: benchmark-queue-tuned
+          # - profile: benchmark-queue-tuned
+          #   runner: blacksmith-16vcpu-ubuntu-2204
+          - profile: benchmark-direct-tuned
             runner: blacksmith-16vcpu-ubuntu-2204
     uses: ./.github/workflows/test-e2e-reusable.yml
     with:
