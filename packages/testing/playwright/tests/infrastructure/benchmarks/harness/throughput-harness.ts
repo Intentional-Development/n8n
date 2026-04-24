@@ -161,7 +161,8 @@ export async function runThroughputTest(options: ThroughputTestOptions): Promise
 			`${resourceSummary}\n` +
 			`  Nodes: ${nodeCount} (${nodeOutputSize}) | Messages: ${messageCount}\n` +
 			`  Completed: ${result.totalCompleted}/${messageCount}\n` +
-			`  Throughput: ${result.avgExecPerSec.toFixed(1)} exec/s | ${result.actionsPerSec.toFixed(1)} actions/s\n` +
+			`  Sustained avg: ${result.avgExecPerSec.toFixed(1)} exec/s | ${result.actionsPerSec.toFixed(1)} actions/s\n` +
+			`  Tail 60s:      ${result.tailExecPerSec.toFixed(1)} exec/s | ${result.tailActionsPerSec.toFixed(1)} actions/s\n` +
 			`  Duration: ${(result.durationMs / 1000).toFixed(1)}s`,
 	);
 

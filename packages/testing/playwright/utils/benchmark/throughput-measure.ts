@@ -21,8 +21,11 @@ export interface ThroughputResult {
 	totalCompleted: number;
 	durationMs: number;
 	avgExecPerSec: number;
+	/** Rate over the final 60s window — approximates the architectural ceiling. */
+	tailExecPerSec: number;
 	peakExecPerSec: number;
 	actionsPerSec: number;
+	tailActionsPerSec: number;
 	peakActionsPerSec: number;
 	samples: ThroughputSample[];
 }
@@ -173,8 +176,10 @@ function calculateThroughput(
 			totalCompleted: 0,
 			durationMs: 0,
 			avgExecPerSec: 0,
+			tailExecPerSec: 0,
 			peakExecPerSec: 0,
 			actionsPerSec: 0,
+			tailActionsPerSec: 0,
 			peakActionsPerSec: 0,
 			samples: [],
 		};
@@ -202,7 +207,10 @@ function calculateThroughput(
 	// measurement there. If the run is too short to have a post-warmup window
 	// (<= 2x warmup), fall back to measuring from first-active (old behavior)
 	// and flag it in logs so short-run numbers remain interpretable.
-	const WARMUP_MS = 30_000;
+	// 60s chosen based on observed ramp-up durations: V8 JIT + PG pool fill +
+	// Kafka consumer stabilization typically reached steady state at ~60-70s
+	// on Blacksmith runners.
+	const WARMUP_MS = 60_000;
 	const activeSpanMs = lastActiveSample.timestamp - firstActiveSample.timestamp;
 	const useWarmupSkip = activeSpanMs >= 2 * WARMUP_MS;
 
@@ -240,12 +248,31 @@ function calculateThroughput(
 	// than useful.
 	const avgExecPerSec = durationMs > 0 ? (measuredCompleted / durationMs) * 1000 : 0;
 
+	// Tail rate: throughput across the final 60s of the active window.
+	// Approximates the architectural ceiling — ignores both warm-up and any
+	// mid-run drift (e.g. PG bloat, GC pressure building up over long runs).
+	// Falls back to avg for short runs where the tail is the whole run.
+	const TAIL_WINDOW_MS = 60_000;
+	let tailExecPerSec = avgExecPerSec;
+	const tailStartTime = lastActiveSample.timestamp - TAIL_WINDOW_MS;
+	const tailStartIndex = samples.findIndex((s) => s.timestamp >= tailStartTime);
+	if (tailStartIndex > 0 && tailStartIndex < lastActiveIndex) {
+		const tailAnchor = samples[tailStartIndex];
+		const tailCompletions = lastActiveSample.completed - tailAnchor.completed;
+		const tailDurationMs = lastActiveSample.timestamp - tailAnchor.timestamp;
+		if (tailDurationMs > 0) {
+			tailExecPerSec = (tailCompletions / tailDurationMs) * 1000;
+		}
+	}
+
 	return {
 		totalCompleted,
 		durationMs,
 		avgExecPerSec,
+		tailExecPerSec,
 		peakExecPerSec: 0,
 		actionsPerSec: avgExecPerSec * nodeCount,
+		tailActionsPerSec: tailExecPerSec * nodeCount,
 		peakActionsPerSec: 0,
 		samples,
 	};
@@ -260,6 +287,14 @@ export async function attachThroughputResults(
 ): Promise<void> {
 	await attachMetric(testInfo, 'exec-per-sec', result.avgExecPerSec, 'exec/s', dimensions);
 	await attachMetric(testInfo, 'actions-per-sec', result.actionsPerSec, 'actions/s', dimensions);
+	await attachMetric(testInfo, 'tail-exec-per-sec', result.tailExecPerSec, 'exec/s', dimensions);
+	await attachMetric(
+		testInfo,
+		'tail-actions-per-sec',
+		result.tailActionsPerSec,
+		'actions/s',
+		dimensions,
+	);
 	await attachMetric(testInfo, 'total-completed', result.totalCompleted, 'count', dimensions);
 	await attachMetric(testInfo, 'duration', result.durationMs, 'ms', dimensions);
 }

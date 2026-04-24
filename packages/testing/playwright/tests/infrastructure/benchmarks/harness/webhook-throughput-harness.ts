@@ -162,8 +162,10 @@ export async function runWebhookThroughputTest(options: WebhookThroughputOptions
 
 	console.log(
 		`[WEBHOOK-${mode} RESULT] ${testInfo.title}\n` +
-			`  n8n Throughput: ${throughputResult.avgExecPerSec.toFixed(1)} exec/s | ` +
+			`  n8n Sustained avg: ${throughputResult.avgExecPerSec.toFixed(1)} exec/s | ` +
 			`${throughputResult.actionsPerSec.toFixed(1)} actions/s\n` +
+			`  n8n Tail 60s:      ${throughputResult.tailExecPerSec.toFixed(1)} exec/s | ` +
+			`${throughputResult.tailActionsPerSec.toFixed(1)} actions/s\n` +
 			`  HTTP: ${cannonResult.requests.average.toFixed(1)} req/s | ` +
 			`p50: ${cannonResult.latency.p50}ms | p99: ${cannonResult.latency.p99}ms\n` +
 			`  Errors: ${cannonResult.errors} timeouts, ${cannonResult.non2xx} non-2xx\n` +
