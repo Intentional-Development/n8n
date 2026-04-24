@@ -166,7 +166,7 @@
       "picomatch@2": "2.3.2",
       "picomatch@4": "4.0.4",
       "avsc": "5.7.9",
-      "brace-expansion@<=2.1.0": "2.1.0"
+      "brace-expansion@<=2.1.0": "5.0.5"
     },
     "patchedDependencies": {
       "bull@4.16.4": "patches/bull@4.16.4.patch",
