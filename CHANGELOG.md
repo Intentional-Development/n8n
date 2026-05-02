@@ -1,3 +1,8 @@
+## [v0.9.6] - 2026-05-02
+
+- Wave 19 release: TypeExpr diagnostic integration design, firefly-iii fresh-extract (25 paginated DTOs), Azure OpenAI discriminator corpus (100% round-trip)
+
+
 # [2.18.0](https://github.com/n8n-io/n8n/compare/n8n@2.17.0...n8n@2.18.0) (2026-04-21)
 
 
